@@ -16,13 +16,11 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 import Clutter from 'gi://Clutter';
-import Gio from 'gi://Gio';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 
 export default class NotificationPosition extends Extension {
     _settings;
-    _preferences;
     _bannerPositionChangedId = 0;
     constructor(metadata) {
         super(metadata);
@@ -30,20 +28,21 @@ export default class NotificationPosition extends Extension {
         this._originalYAlign = Main.messageTray.actor.get_y_align();
     }
         enable() {
-        // Get Preferences
-        this._preferences = this.getSettings();
+        // Get Settings
+        this._settings = this.getSettings();
         // Connect to cahnge banner position cahnges
-        this._bannerPositionChangedId = this._preferences.connect("changed::change-banner-position", this._onChangeBannerPosition.bind(this));
+        this._bannerPositionChangedId = this._settings.connect("changed::change-banner-position", this._onChangeBannerPosition.bind(this));
         // Initial notification banner position
         this._onChangeBannerPosition();
     
     }
     disable() {
         this._original();
+        this._settings = null;
     }
     _onChangeBannerPosition() {
         // Get current position
-        const bannerPositon = this._preferences?.get_int('change-banner-position');
+        const bannerPositon = this._settings?.get_int('change-banner-position');
         // check and chose the method
         if (bannerPositon == 0) {
             this.rightBottom();
