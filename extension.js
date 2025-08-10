@@ -22,24 +22,37 @@ import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 export default class NotificationPosition extends Extension {
     _settings;
     _bannerPositionChangedId = 0;
+    _bannerActor = null;
+
     constructor(metadata) {
         super(metadata);
+        this._bannerActor = Main.messageTray._bannerBin ?? Main.messageTray.actor ?? null;
         this._originalBannerAlignment = Main.messageTray.bannerAlignment;
-        this._originalYAlign = Main.messageTray.actor.get_y_align();
+        this._originalYAlign = (this._bannerActor && this._bannerActor.get_y_align)
+            ? this._bannerActor.get_y_align()
+            : Clutter.ActorAlign.START;
     }
-        enable() {
+
+    enable() {
         // Get Settings
         this._settings = this.getSettings();
-        // Connect to cahnge banner position cahnges
-        this._bannerPositionChangedId = this._settings.connect("changed::change-banner-position", this._onChangeBannerPosition.bind(this));
+        // Connect to change banner position changes
+        this._bannerPositionChangedId = this._settings.connect(
+            "changed::change-banner-position",
+            this._onChangeBannerPosition.bind(this)
+        );
         // Initial notification banner position
         this._onChangeBannerPosition();
-    
     }
+
     disable() {
         this._original();
+        if (this._settings && this._bannerPositionChangedId) {
+            this._settings.disconnect(this._bannerPositionChangedId);
+        }
         this._settings = null;
     }
+
     _onChangeBannerPosition() {
         // Get current position
         const bannerPositon = this._settings?.get_int('change-banner-position');
@@ -67,49 +80,59 @@ export default class NotificationPosition extends Extension {
         }
         else if (bannerPositon == 7) {
             this.leftCenter();
-        }        
+        }
         else if (bannerPositon == 8) {
             this.leftUpper();
         }
     }
+
     leftUpper() {
         Main.messageTray.bannerAlignment = Clutter.ActorAlign.START;
-        Main.messageTray.actor.set_y_align(Clutter.ActorAlign.START);
+        this._bannerActor && this._bannerActor.set_y_align?.(Clutter.ActorAlign.START);
     }
+
     leftCenter() {
         Main.messageTray.bannerAlignment = Clutter.ActorAlign.START;
-        Main.messageTray.actor.set_y_align(Clutter.ActorAlign.CENTER);
+        this._bannerActor && this._bannerActor.set_y_align?.(Clutter.ActorAlign.CENTER);
     }
+
     leftBottom() {
         Main.messageTray.bannerAlignment = Clutter.ActorAlign.START;
-        Main.messageTray.actor.set_y_align(Clutter.ActorAlign.END);
+        this._bannerActor && this._bannerActor.set_y_align?.(Clutter.ActorAlign.END);
     }
+
     rightUpper() {
         Main.messageTray.bannerAlignment = Clutter.ActorAlign.END;
-        Main.messageTray.actor.set_y_align(Clutter.ActorAlign.START);
+        this._bannerActor && this._bannerActor.set_y_align?.(Clutter.ActorAlign.START);
     }
+
     rightCenter() {
         Main.messageTray.bannerAlignment = Clutter.ActorAlign.END;
-        Main.messageTray.actor.set_y_align(Clutter.ActorAlign.CENTER);
+        this._bannerActor && this._bannerActor.set_y_align?.(Clutter.ActorAlign.CENTER);
     }
+
     rightBottom() {
         Main.messageTray.bannerAlignment = Clutter.ActorAlign.END;
-        Main.messageTray.actor.set_y_align(Clutter.ActorAlign.END);
+        this._bannerActor && this._bannerActor.set_y_align?.(Clutter.ActorAlign.END);
     }
+
     middleUpper() {
         Main.messageTray.bannerAlignment = Clutter.ActorAlign.CENTER;
-        Main.messageTray.actor.set_y_align(Clutter.ActorAlign.START);
+        this._bannerActor && this._bannerActor.set_y_align?.(Clutter.ActorAlign.START);
     }
+
     middleCenter() {
         Main.messageTray.bannerAlignment = Clutter.ActorAlign.CENTER;
-        Main.messageTray.actor.set_y_align(Clutter.ActorAlign.CENTER);
+        this._bannerActor && this._bannerActor.set_y_align?.(Clutter.ActorAlign.CENTER);
     }
+
     middleBottom() {
         Main.messageTray.bannerAlignment = Clutter.ActorAlign.CENTER;
-        Main.messageTray.actor.set_y_align(Clutter.ActorAlign.END);
+        this._bannerActor && this._bannerActor.set_y_align?.(Clutter.ActorAlign.END);
     }
+
     _original() {
         Main.messageTray.bannerAlignment = this._originalBannerAlignment;
-        Main.messageTray.actor.set_y_align(this._originalYAlign);
+        this._bannerActor && this._bannerActor.set_y_align?.(this._originalYAlign);
     }
 }
