@@ -1,7 +1,7 @@
 {
   "uuid": "set-notification-position@brgvos",
   "name": "Set Notification Banner Position",
-  "description": "Changes position of the notification banner",
+  "description": "Changes position of the notification banner\n\n This extension is included by default in BRGV-OS and AnduinOS",
   "settings-schema": "org.gnome.shell.extensions.set-notification-position",
   "shell-version": [
     "45",
@@ -11,6 +11,6 @@
     "49"
   ],
   "url": "https://github.com/florintanasa/set-notification-position",
-  "version": 2,
+  "version": 3,
   "version-name": "2"
 }
